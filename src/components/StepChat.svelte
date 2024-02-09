@@ -20,28 +20,29 @@
       event.preventDefault();
 
       loading = true;
-
+      answer = "";
+      
       const question = event.target.question.value;
 
-      try{
-         const res = await fetch("/api/ask", {
-            metod : "POST",
-            headers: {
-               "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-               id,
-               question,
-            })
-         })
+      const searchParams = new URLSearchParams();
+      searchParams.append('id', id);
+      searchParams.append('question', question);
 
-         if(!res.ok){
-            console.error("Failed to submit question")
-            return
+      try{
+         const evertSource = new EventSource(`api/ask?${searchParams.toString()}`);
+
+         evertSource.onemessage = (event) => {
+            loading = false;
+            const incomingData = JSON.stringify(event.data);
+            
+            if(incomingData === 'END'){
+               evertSource.close();
+               return
+            }
+            
+            message += incomingData;
          }
-         
-         const { answer: apiAnswer } = await res.json();
-         answer = apiAnswer;
+
       } catch (error) {
          setAppStatusError();
          return
