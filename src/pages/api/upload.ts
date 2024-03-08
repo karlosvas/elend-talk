@@ -2,6 +2,7 @@ import type { APIRoute } from "astro";
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { v2 as cloudinary } from 'cloudinary';
+import type { UploadApiResponse } from 'cloudinary';
 
 cloudinary.config({
    cloud_name: 'karlosvas',
@@ -15,7 +16,7 @@ const oputDir = path.join(process.cwd(), 'public/text');
 const uploadStream = async (buffer: Uint8Array, options: {
    folder: string
    ocr?: string
-}): Promise<UploadApiRespone> => {
+}): Promise<UploadApiResponse> => {
    return new Promise((resolve, reject) => {
       cloudinary.uploader.upload_stream(options, (error, result) => {
          if (result) return resolve(result);

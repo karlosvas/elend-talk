@@ -29,7 +29,9 @@
       searchParams.append('question', question);
 
       try{
-         const evertSource = new EventSource(`api/ask?${searchParams.toString()}`);
+         // const evertSource = new EventSource(`api/ask?${searchParams.toString()}`);
+         const evertSource = new EventSource(`api/ollama?${searchParams.toString()}`);
+         console.log("Event Source: ", evertSource)
 
          evertSource.onemessage = (event) => {
             loading = false;
@@ -40,7 +42,7 @@
                return
             }
             
-            message += incomingData;
+            answer += incomingData;
          }
 
       } catch (error) {

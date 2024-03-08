@@ -15,6 +15,7 @@
     "@astrojs/tailwind": "^5.1.0",
     "astro": "^4.3.5",
     "cloudinary": "^2.0.1",
+    "ollama": "^0.4.9",
     "openai": "^4.27.0",
     "svelte": "^4.2.10",
     "svelte-file-dropzone": "^2.0.4",
