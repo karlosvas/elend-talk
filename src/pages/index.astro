@@ -1,21 +1,19 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import App from '../components/App.svelte';
+import Layout from "../layouts/Layout.astro";
+import App from "../components/App.svelte";
 ---
 
-<Layout title="Chat with PDF">
-	<div class="absolute top-0 z-[-2] h-screen w-screen bg-white bg-[radial-gradient(ellipse_200%_200%_at_50%_50%,rgba(143,148,251,0.3),rgba(143,148,251,1))]"></div>
-	</div>
-	<main class="grid place-content-center min-h-screen w-screen">
-		<h1 class="text-6xl opacity-70 font-blod text-center pb-10">
-			Chat with PDF
-		</h1>
-		<section class="container w-[1000px] max-w-xl h-64">
-			<App client:idle />
-		</section>
-	</main>
+<Layout title="ElendTolk">
+  <div
+    class="absolute top-0 z-[-2] h-screen w-screen bg-white bg-[radial-gradient(ellipse_200%_200%_at_50%_50%,rgba(0,0,0,0.9),rgba(100,148,251,1))]"
+  >
+  </div>
 </Layout>
-
-<style>
-	
-</style>
+<main class="grid place-content-center min-h-screen">
+  <div class="flex justify-center w-screen absolute top-0 bg-gradient-to-b from-[#000000] to-[#00000079]">
+    <h1 class="text-6xl font-blod text-center pb-10 text-white mt-20">ElendTolk</h1>
+  </div>
+  <section class="container w-[1000px] max-w-xl h-64">
+    <App client:idle />
+  </section>
+</main>

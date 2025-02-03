@@ -1,71 +1,56 @@
 import type { APIRoute } from "astro";
-import fs from 'node:fs/promises';
-import path from 'node:path';
-import { v2 as cloudinary } from 'cloudinary';
-import type { UploadApiResponse } from 'cloudinary';
-
-cloudinary.config({
-   cloud_name: 'karlosvas',
-   api_key: import.meta.env.CLOUDINARY_API_KEY,
-   api_secret: import.meta.env.CLOUDINARY_SECRET
-});
-
-const oputDir = path.join(process.cwd(), 'public/text');
-
-// Upload stream to Cloudinary, convert to binary and store it in a buffer.
-const uploadStream = async (buffer: Uint8Array, options: {
-   folder: string
-   ocr?: string
-}): Promise<UploadApiResponse> => {
-   return new Promise((resolve, reject) => {
-      cloudinary.uploader.upload_stream(options, (error, result) => {
-         if (result) return resolve(result);
-         reject(error);
-      }).end(buffer);
-   });
-}
+import fs from "node:fs/promises";
+import path from "node:path";
+import { uploadStream } from "../utils/utils";
+import type { UploadApiResponse } from "cloudinary";
 
 export const POST: APIRoute = async ({ request }) => {
-   // Obtain the form data from the request
-   const formData = await request.formData();
-   const file = formData.get('file') as File;
+  // Obtener el archivo del formulario
+  const formData = await request.formData();
+  const file = formData.get("file") as File;
 
-   // Convert the file to array buffer
-   if (file === null) {
-      return new Response("No file found", { status: 400 });
-   }
-   const arrayBuffer = await file.arrayBuffer();
-   const unit8Array = new Uint8Array(arrayBuffer);
+  if (file === null) {
+    return new Response("No file found", { status: 400 });
+  }
 
-   // Upload the file to Cloudinary
-   const result = await uploadStream(unit8Array, {
-      folder: 'pdf',
-      ocr: 'adv_ocr'
-   });
+  // Convierte el archivo en un array buffer
+  const arrayBuffer = await file.arrayBuffer();
+  const unit8Array = new Uint8Array(arrayBuffer);
 
-   const {
-      asset_id: id,
-      secure_url: url,
-      pages,
-      info
-   } = result;
+  // Subir el archivo a Cloudinary
+  let result: UploadApiResponse = {} as UploadApiResponse;
+  try {
+    result = await uploadStream(unit8Array);
+  } catch (error) {
+    return new Response("Error uploading file", { status: 500 });
+  }
 
-   const data = info?.ocr?.adv_ocr?.data;
-   const text = data.map((blocks: { textAnnotations: { description: string }[] }) => {
-      const annotations = blocks['textAnnotations'] ?? {};
+  // Extraer los datos necesarios
+  const { asset_id: id, secure_url: url, pages, info } = result;
+  // Extraer el texto del archivo
+  const data = info?.ocr?.adv_ocr?.data;
+  const text = data
+    .map((blocks: { textAnnotations: { description: string }[] }) => {
+      const annotations = blocks["textAnnotations"] ?? {};
       const first = annotations[0] ?? {};
-      const content = first['description'] ?? '';
+      const content = first["description"] ?? "";
       return content.trim();
-   }).filter(Boolean).join('\n');
+    })
+    .filter(Boolean)
+    .join("\n");
 
-   // Save the text to a file
-   fs.writeFile(`${oputDir}/${id}.txt`, text, 'utf-8');
+  // Directorio de salida
+  const oputDir = path.join(process.cwd(), "public/text");
+  // Save the text to a file
+  fs.writeFile(`${oputDir}/${id}.txt`, text, "utf-8");
 
-   // Simulate delay 3 sec.
-   await new Promise((resolve) => setTimeout(resolve, 3000));
-   return new Response(JSON.stringify({
+  // Simulate delay 3 sec.
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+  return new Response(
+    JSON.stringify({
       id,
       url,
-      pages
-   }));
-}
+      pages,
+    })
+  );
+};

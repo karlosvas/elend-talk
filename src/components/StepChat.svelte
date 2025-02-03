@@ -2,68 +2,31 @@
    import { Input,  Label, Spinner} from 'flowbite-svelte';
    import { appStatusInfo, setAppStatusError } from '../store.ts';
    const { url, pages, id } = $appStatusInfo;
+   import { getCloudinaryImg } from '../services/cloudinary.ts';
+   import { submitOllama } from '../services/ollama.ts';
 
+   // Variables de estado
    let loading = false;
    let answer = "";
 
-   // Maximum images to display
-   const maxImagesToShow = Math.min(pages, 4);
-   const images = Array.from({ length: maxImagesToShow }, (_, i) => {
-   const page = i + 1;
-   console.log(url)
-   return url
-      .replace('/upload/', `/upload/w_400,h_540,c_fill,pg_${page}/`)
-      .replace('.pdf', '.jpg');
-   });
-
-   const handleSumit = async (event) => {
-      event.preventDefault();
-
-      loading = true;
-      answer = "";
-      
-      const question = event.target.question.value;
-
-      const searchParams = new URLSearchParams();
-      searchParams.append('id', id);
-      searchParams.append('question', question);
-
-      try{
-         // const evertSource = new EventSource(`api/ask?${searchParams.toString()}`);
-         const evertSource = new EventSource(`api/ollama?${searchParams.toString()}`);
-         console.log("Event Source: ", evertSource)
-
-         evertSource.onemessage = (event) => {
-            loading = false;
-            const incomingData = JSON.stringify(event.data);
-            
-            if(incomingData === 'END'){
-               evertSource.close();
-               return
-            }
-            
-            answer += incomingData;
-         }
-
-      } catch (error) {
-         setAppStatusError();
-         return
-      } finally {
-         loading = false;
-      }
-
-      
-   }
+   // Función para obtener las imágenes de cloudinary, devuelbe string[]
+   let images = getCloudinaryImg(url, pages);
 </script>
 
-<div clas="grid grid-cols-4 gap-2">
+<!-- Mostramos las imágenes de las páginas del PDF -->
+<div class="flex flex-row gap-4 overflow-x-auto p-4">
    {#each images as image }
-      <img src={image} alt="PDF page" class="rounded w-1/2 h-auto aspect-[400/540]" />
+      <img 
+         src={image} 
+         alt="PDF page" 
+         class="rounded w-auto h-64 object-contain"
+      />
    {/each}
 </div>
 
-<form class='mt-8' on:submit={handleSumit}>
-  <Label for="question" class="block mb-2">Leave your question here</Label>
+<!-- Formulario para enviar la pregunta -->
+<form class='mt-8' on:submit={submitOllama}>
+  <Label for="question" class="block mb-2 text-white">Leave your question here</Label>
   <Input 
     id="question"
     required
