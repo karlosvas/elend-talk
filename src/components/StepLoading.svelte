@@ -4,7 +4,7 @@
 
 <div class="flex justify-center items-center">
     <Spinner />
-    <p class="pl-5 font-bold">
+    <p class="pl-5 font-bold text-white">
         Loading...
     </p>
 </div>

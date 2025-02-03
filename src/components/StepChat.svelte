@@ -2,15 +2,20 @@
    import { Input,  Label, Spinner} from 'flowbite-svelte';
    import { appStatusInfo, setAppStatusError } from '../store.ts';
    const { url, pages, id } = $appStatusInfo;
-   import { getCloudinaryImg } from '../services/cloudinary.ts';
-   import { submitOllama } from '../services/ollama.ts';
+   import { getCloudinaryImg } from '../services/cloudinaryService.ts';
+   import { submitOllama } from '../services/ollamaService.ts';
 
    // Variables de estado
-   let loading = false;
-   let answer = "";
+   let loading = {value: false};
+   let answer = {value: ""};
 
    // Función para obtener las imágenes de cloudinary, devuelbe string[]
    let images = getCloudinaryImg(url, pages);
+
+   // Datos adicionales que se enviarán al servidor, clicando en el botón de enviar
+   const handleSubmit = (event) => {
+    submitOllama({ event, loading, answer });
+  };
 </script>
 
 <!-- Mostramos las imágenes de las páginas del PDF -->
@@ -25,7 +30,7 @@
 </div>
 
 <!-- Formulario para enviar la pregunta -->
-<form class='mt-8' on:submit={submitOllama}>
+<form class='mt-8' on:submit={handleSubmit}>
   <Label for="question" class="block mb-2 text-white">Leave your question here</Label>
   <Input 
     id="question"
@@ -34,14 +39,14 @@
   ></Input>
 </form>
 
-{#if loading}
+{#if loading.value}
    <div class="felx justify-center items-center flex-col gap-y-2">
       <Spinner />
       <p class="opacity-75">Thinking</p>
    </div>
 {/if}
 
-{#if answer}
+{#if answer.value.length > 0}
    <div class="mt-8">
       <p class="font-medium">Response</p>
       <p>{answer}</p>
