@@ -14,10 +14,9 @@
   <Alert>
     <p>Error ocurred, imposibol to load</p>
   </Alert>
-{:else if $appStatus === APP_STATUS.CHAT_MODE}
-  <StepChat />
 {:else}
  <Alert>
     <p>Unknown status</p>
  </Alert>
 {/if}
+<StepChat />

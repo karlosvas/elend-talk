@@ -1,3 +1,5 @@
+import { type Writable } from "svelte/store";
+
 export interface SubmitOllamaParams {
   event: Event & {
     target: {
@@ -6,10 +8,6 @@ export interface SubmitOllamaParams {
       };
     };
   };
-  loading: {
-    value: boolean;
-  };
-  answer: {
-    value: string;
-  };
+  loading: Writable<{ value: boolean }>;
+  answer: Writable<{ value: string }>;
 }

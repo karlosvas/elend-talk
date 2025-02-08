@@ -41,6 +41,13 @@ export const POST: APIRoute = async ({ request }) => {
 
   // Directorio de salida
   const oputDir = path.join(process.cwd(), "public/text");
+
+  // Verificar si el directorio existe, si no, crearlo
+  try {
+    await fs.access(oputDir);
+  } catch (error) {
+    await fs.mkdir(oputDir, { recursive: true });
+  }
   // Save the text to a file
   fs.writeFile(`${oputDir}/${id}.txt`, text, "utf-8");
 

@@ -5,8 +5,22 @@ import { type SubmitOllamaParams } from "../types/types";
 export const submitOllama = async ({ event, loading, answer }: SubmitOllamaParams): Promise<void> => {
   event.preventDefault();
 
-  // EventSource para la conexión con el servidor
-  let eventSource: EventSource | null = null;
+  const updateAnswer = (newText: string) => {
+    answer.update((current) => {
+      return { value: current.value + newText };
+    });
+  };
+
+  const updateLoading = (newLoading: boolean) => {
+    loading.update(() => {
+      return { value: newLoading };
+    });
+  };
+
+  // Elimanar el mensaje writeable
+  answer.update(() => {
+    return { value: "" };
+  });
 
   // Obtener pregunta y generar un identificador único
   const question = event.target.question.value;
@@ -21,13 +35,15 @@ export const submitOllama = async ({ event, loading, answer }: SubmitOllamaParam
     eventSource.onmessage = (event: MessageEvent) => {
       try {
         const data = JSON.parse(event.data);
+
         if (data === "END") {
+          // Añadir un salto de linea al terminar el mensaje
           eventSource.close();
-          loading.value = false;
+          updateLoading(false);
           return;
         }
 
-        answer.value += data.message;
+        updateAnswer(data.message.content);
       } catch (error) {
         console.error("Error parsing message:", error);
       }
@@ -36,10 +52,11 @@ export const submitOllama = async ({ event, loading, answer }: SubmitOllamaParam
     eventSource.onerror = (error) => {
       console.error("EventSource error:", error);
       eventSource.close();
-      loading.value = false;
+      updateLoading(false);
     };
   } catch (error) {
     console.error("Stream error:", error);
-    loading.value = false;
+    updateLoading(false);
+    setAppStatusError("Error connecting to ollama");
   }
 };

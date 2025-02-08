@@ -5,15 +5,20 @@ import App from "../components/App.svelte";
 
 <Layout title="ElendTolk">
   <div
-    class="absolute top-0 z-[-2] h-screen w-screen bg-white bg-[radial-gradient(ellipse_200%_200%_at_50%_50%,rgba(0,0,0,0.9),rgba(100,148,251,1))]"
+    class="fixed top-0 z-[-2] h-full w-screen bg-white bg-[radial-gradient(ellipse_200%_200%_at_50%_50%,rgba(0,0,0,0.9),rgba(100,148,251,1))]"
   >
   </div>
+  <main class="grid place-content-center min-h-screen mb-20">
+    <div class="absolute flex justify-center w-full h-35 top-0 bg-gradient-to-b from-[#000000] to-[#00000079]">
+      <h1 class="text-6xl font-blod text-center pb-10 text-white mt-20">ElendTolk</h1>
+    </div>
+    <section class="container w-[1000px] max-w-xl min-h-64 mt-60">
+      <App client:idle />
+    </section>
+  </main>
+  <footer
+    class="flex justify-center items-center w-full absolute botoom-0 bg-gradient-to-t from-[#000000] to-[#00000079] h-36"
+  >
+    <p class="text-white text-center">© 2025 ElendTolk</p>
+  </footer>
 </Layout>
-<main class="grid place-content-center min-h-screen">
-  <div class="flex justify-center w-screen absolute top-0 bg-gradient-to-b from-[#000000] to-[#00000079]">
-    <h1 class="text-6xl font-blod text-center pb-10 text-white mt-20">ElendTolk</h1>
-  </div>
-  <section class="container w-[1000px] max-w-xl h-64">
-    <App client:idle />
-  </section>
-</main>
