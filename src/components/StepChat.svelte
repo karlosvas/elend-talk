@@ -1,15 +1,15 @@
 <script>
    import { Input,  Label, Spinner} from 'flowbite-svelte';
    import { appStatusInfo, setAppStatusError } from '../store.ts';
-   const { url, pages, id } = $appStatusInfo;
    import { getCloudinaryImg } from '../services/cloudinaryService.ts';
    import { submitOllama } from '../services/ollamaService.ts';
    import { writable } from 'svelte/store';
    import { marked } from 'marked';
+   const { id, url, pages } = $appStatusInfo;
 
    // Variables de estado
    export let loading = writable({value: false});
-   export let answer = writable({value: "hola que tal jdf  fihwfg ihg asknfkrn ngkhw ghks nhsnsig hks khs gkhskhsg hshgfs hhsgkhsgkhfs sg sf kgsh gkhsgkhsgkhgs ksghgsh aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa supercalifragilisticoespiralidosodelrevesyd hipopotamo ksghgsh aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa supercalifragilisticoespiralidosodelrevesyd hipopotamo ksghgsh aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa supercalifragilisticoespiralidosodelrevesyd hipopotamo ksghgsh aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa supercalifragilisticoespiralidosodelrevesyd hipopotamo ksghgsh aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa supercalifragilisticoespiralidosodelrevesyd hipopotamo ksghgsh aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa supercalifragilisticoespiralidosodelrevesyd hipopotamo "});
+   export let answer = writable({value: ""});
 
    // Función para obtener las imágenes de cloudinary, devuelbe string[]
    let images = getCloudinaryImg(url, pages);
@@ -18,7 +18,6 @@
    const handleSubmit =  async (event) => {
       try{
          await submitOllama({ event, loading, answer });
-         console.log(answer.value);
       } catch (error) {
          setAppStatusError(error);
       }

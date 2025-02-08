@@ -27,14 +27,18 @@ export const GET: APIRoute = async ({ request }) => {
   }
 
   return responseSSE({ request }, async (sendEvent) => {
-    const message = [
+    const history = [
+      {
+        role: "system",
+        content:
+          'Eres un investigador español experimentado, experto en interpretar y responder preguntas basadas en las fuentes proporcionadas. Utilizando el contexto proporcionado entre las etiquetas <context></context>, genera una respuesta concisa para una pregunta rodeada con las etiquetas <question></question>. Debes usar únicamente información del contexto. Usa un tono imparcial y periodístico. No repitas texto. Si no hay nada en el contexto relevante para la pregunta en cuestión, simplemente di "No lo sé". No intentes inventar una respuesta. Cualquier cosa entre los siguientes bloques html context se recupera de un banco de conocimientos, no es parte de la conversación con el usuario.',
+      },
       {
         role: "user",
         content: `<context>${combinedText}</context><question>${question}</question>`,
       },
     ];
 
-    console.log(message[0]);
     try {
       const response = await fetch("http://localhost:11434/api/chat", {
         method: "POST",
@@ -43,7 +47,7 @@ export const GET: APIRoute = async ({ request }) => {
         },
         body: JSON.stringify({
           model: "llama3.2",
-          messages: [message[0]],
+          messages: history,
         }),
       });
 
@@ -55,11 +59,9 @@ export const GET: APIRoute = async ({ request }) => {
         throw new Error("Response body is empty");
       }
 
-      console.log(response);
       const reader = response.body.getReader();
       const decoder = new TextDecoder("utf-8");
 
-      console.log("Connected to ollama");
       let buffer = "";
 
       while (true) {
@@ -67,17 +69,13 @@ export const GET: APIRoute = async ({ request }) => {
         if (done) break;
 
         buffer += decoder.decode(value, { stream: true });
-        console.log("Buffer:", buffer);
 
         let boundary = buffer.indexOf("\n");
         while (boundary !== -1) {
           const chunk = buffer.slice(0, boundary);
           buffer = buffer.slice(boundary + 1);
 
-          console.log("Chunk received:", chunk);
-
           try {
-            console.log("Parsed data:", chunk);
             const data = JSON.parse(chunk);
             sendEvent(data);
           } catch (parseError) {
