@@ -22,3 +22,5 @@ pnpm-debug.log*
 
 # Salida de contenido pdf
 *.txt
+
+chatgpt.ts
