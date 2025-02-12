@@ -1,6 +1,11 @@
 import { type APIRoute } from "astro";
 import { readdir, readFile } from "node:fs/promises";
-import { responseSSE } from "../utils/utils.ts";
+import { processStream, responseSSE } from "../../utils/utilsSEE.ts";
+import { OllamaClient, history } from "../../config/ollamaConfig.ts";
+import { type Message } from "@/types/types.ts";
+import { MODEL_OLLAMA } from "@/config/constants.ts";
+
+const ollama = new OllamaClient();
 
 // Enpoint para la API de ollama
 export const GET: APIRoute = async ({ request }) => {
@@ -10,81 +15,44 @@ export const GET: APIRoute = async ({ request }) => {
 
   if (!question) return new Response("Missing parameters", { status: 400 });
 
-  // Leer el texto de los archivos
+  // Ruta a los .txt que fueron trasnformados por los pdf (disPath)
+  // Contexto de todos los pdf (context)
   const dirPath = "public/text";
-  let combinedText = "";
+  let context = "";
 
   try {
-    // Leer los archivos dentro de public/text
+    // Leer todos los archivos dentro de public/text para pasarselo como conexto
     const files: string[] = await readdir(dirPath);
     for (const file of files) {
       const filePath = `${dirPath}/${file}`;
       const fileContent = await readFile(filePath, "utf-8");
-      combinedText += fileContent + "\n";
+      context += fileContent + "\n";
     }
   } catch (error) {
     return new Response("Error reading files", { status: 500 });
   }
 
+  // Respuesta SSE (Server Sent Event)
   return responseSSE({ request }, async (sendEvent) => {
-    const history = [
-      {
-        role: "system",
-        content:
-          'Eres un investigador español experimentado, experto en interpretar y responder preguntas basadas en las fuentes proporcionadas. Utilizando el contexto proporcionado entre las etiquetas <context></context>, genera una respuesta concisa para una pregunta rodeada con las etiquetas <question></question>. Debes usar únicamente información del contexto. Usa un tono imparcial y periodístico. No repitas texto. Si no hay nada en el contexto relevante para la pregunta en cuestión, simplemente di "No lo sé". No intentes inventar una respuesta. Cualquier cosa entre los siguientes bloques html context se recupera de un banco de conocimientos, no es parte de la conversación con el usuario.',
-      },
-      {
-        role: "user",
-        content: `<context>${combinedText}</context><question>${question}</question>`,
-      },
-    ];
+    // Historico de messajes, le añadimos el nuevo
+    history.push({
+      role: "user",
+      content: `<context>${context}</context><question>${question}</question>`,
+    });
+
+    // Respuesta de ollama
+    let newResponseAssistant: Message = {
+      role: "assistant",
+      content: "",
+    };
 
     try {
-      const response = await fetch("http://localhost:11434/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "llama3.2",
-          messages: history,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Ollama API error: ${response.status}`);
-      }
-
-      if (!response.body) {
-        throw new Error("Response body is empty");
-      }
-
+      // Obtenemos la repuesta de la api de ollama
+      const response = await ollama.submitChat({ model: MODEL_OLLAMA, messages: history });
+      // getReader es un método de Response que devuelbe un ReadableStreamDefaultReader.
+      // Este lector permite leer el flujo de datos de la respuesta de manera controlada, chunk por chunk.
       const reader = response.body.getReader();
-      const decoder = new TextDecoder("utf-8");
-
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-
-        let boundary = buffer.indexOf("\n");
-        while (boundary !== -1) {
-          const chunk = buffer.slice(0, boundary);
-          buffer = buffer.slice(boundary + 1);
-
-          try {
-            const data = JSON.parse(chunk);
-            sendEvent(data);
-          } catch (parseError) {
-            console.error("Error parsing chunk:", parseError);
-          }
-
-          boundary = buffer.indexOf("\n");
-        }
-      }
+      await processStream(reader, newResponseAssistant, sendEvent);
     } catch (error) {
       if (error.name === "AbortError") {
         console.error("Request aborted due to timeout");
@@ -92,6 +60,8 @@ export const GET: APIRoute = async ({ request }) => {
         console.error("Error sending message to ollama:", error);
       }
     } finally {
+      // Añadimos el mensaje recien dado por ollama al historial
+      history.push(newResponseAssistant);
       sendEvent("END");
     }
   });

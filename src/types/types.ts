@@ -11,3 +11,55 @@ export interface SubmitOllamaParams {
   loading: Writable<{ value: boolean }>;
   answer: Writable<{ value: string }>;
 }
+
+export interface ModelCreationParams {
+  name: string;
+  modelfile: string;
+}
+
+export interface OllamaResponse {
+  status: string;
+  error?: string;
+}
+
+export interface OllamaConfig {
+  baseURL: string;
+  timeout?: number;
+}
+
+export type LogHistory = {
+  role: string;
+  content: string;
+};
+
+export interface Message {
+  role: "assistant" | "user" | "system";
+  content: string;
+  images?: null | string[];
+}
+
+export interface OllamaResponseChat {
+  model: string;
+  created_at: string;
+  message: Message;
+  done: boolean;
+}
+
+export interface OllamaCompletionResponse {
+  model: string;
+  created_at: string;
+  done: boolean;
+  total_duration: number;
+  load_duration: number;
+  prompt_eval_count: number;
+  prompt_eval_duration: number;
+  eval_count: number;
+  eval_duration: number;
+}
+
+export type AppStatusInfo = {
+  id: string;
+  url: string;
+  pages: number;
+  text: string;
+};

@@ -1,4 +1,4 @@
-import { setAppStatusError } from "../store";
+import { setAppStatusError } from "../utils/store";
 import { type SubmitOllamaParams } from "../types/types";
 
 // Función para enviar la pregunta con ollama

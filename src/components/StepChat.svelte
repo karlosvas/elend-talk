@@ -1,11 +1,11 @@
 <script>
    import { Input,  Label, Spinner} from 'flowbite-svelte';
-   import { appStatusInfo, setAppStatusError } from '../store.ts';
-   import { getCloudinaryImg } from '../services/cloudinaryService.ts';
-   import { submitOllama } from '../services/ollamaService.ts';
+   import { appStatusInfo, setAppStatusError } from '../utils/store';
+   import { getCloudinaryImg } from '../services/cloudinaryService';
+   import { submitOllama } from '../services/ollamaService';
    import { writable } from 'svelte/store';
    import { marked } from 'marked';
-   const { id, url, pages } = $appStatusInfo;
+   const { id, url, pages, text } = $appStatusInfo;
 
    // Variables de estado
    export let loading = writable({value: false});

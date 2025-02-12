@@ -1,6 +1,7 @@
 <script>
-   import { setAppStatusLoading, setAppStatusError, setAppStatusChatMode } from '../store.ts';
+   import { setAppStatusLoading, setAppStatusError, setAppStatusChatMode } from '../utils/store';
    import Dropzone from "svelte-file-dropzone";
+   import { extractTextFromPDF } from '..//utils/pdfjs';
 
    // Archivos aceptados y rechazados
    let files = {
@@ -8,41 +9,43 @@
       rejected: []
    };
 
-   // Escojemos archivos
    async function handleFilesSelect(e) {
-      const { acceptedFiles, fileRejections } = e.detail;
-      files.accepted = [...files.accepted, ...acceptedFiles];
-      files.rejected = [...files.rejected, ...fileRejections];
-      
-      // Obtenemos el nuevo estado de los archivos si hay alguno
-      if(acceptedFiles.length > 0) {
-         // Pasamos a estado de carga
-         setAppStatusLoading();
+    try {
+        const { acceptedFiles, fileRejections } = e.detail;
+        files.accepted = [...files.accepted, ...acceptedFiles];
+        files.rejected = [...files.rejected, ...fileRejections];
+        
+        setAppStatusLoading();
 
-         // Creamos un objeto FormData para enviar el archivo
-         const formData = new FormData();
-         formData.append('file', acceptedFiles[0]);
+        const text = await extractTextFromPDF(acceptedFiles[0]);
+        console.log(text);
 
+        setAppStatusChatMode({ id:"1", url: "1", page:0, text });
+         // TODO: Creditos terminados
+         // const formData = new FormData();
+         // formData.append('file', acceptedFiles[0]);
          // Enviamos el archivo al servidor para alamcenarlo en cloudinary
-         const res = await fetch('api/upload', {
-            method: 'POST',
-            body: formData,
-            headers: {
-               'Accept': 'application/json'
-            }
-         });
-
+         // const res = await fetch('api/upload', {
+         //    method: 'POST',
+         //    body: formData,
+         //    headers: {
+         //       'Accept': 'application/json'
+         //    }
+         // });
          // Si hay un error, pasamos a estado de error
-         if(!res.ok) {
-            setAppStatusError();
-            return;
-         }  
+         //if(!res.ok) {
+         //    setAppStatusError();
+         //    return;
+         // }  
 
-         // Obtenemos la respuesta del servidor
-         const { id, url, pages } = await res.json();
-         setAppStatusChatMode({ id, url, pages });
-      }
-  }
+         // // Obtenemos la respuesta del servidor
+         // const { id, url, pages } = await res.json();
+         // setAppStatusChatMode({ id, url, pages });
+   } catch (error) {
+      console.error(error);
+      setAppStatusError();
+   }
+}
 </script>
 
 <!-- Si aun no hay archivos subidos, mostramos el grag and drop -->

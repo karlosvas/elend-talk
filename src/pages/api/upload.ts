@@ -1,8 +1,8 @@
-import type { APIRoute } from "astro";
+import { type APIRoute } from "astro";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { uploadStream } from "../utils/utils";
-import type { UploadApiResponse } from "cloudinary";
+import { uploadStream } from "../../utils/utilsSEE.ts";
+import { type UploadApiResponse } from "cloudinary";
 
 export const POST: APIRoute = async ({ request }) => {
   // Obtener el archivo del formulario
@@ -21,8 +21,21 @@ export const POST: APIRoute = async ({ request }) => {
   let result: UploadApiResponse = {} as UploadApiResponse;
   try {
     result = await uploadStream(unit8Array);
-  } catch (error) {
-    return new Response("Error uploading file", { status: 500 });
+  } catch (error: any) {
+    if (error?.http_code === 420) {
+      console.error(error);
+      throw new Error("Error: " + error.message + "\nStatus: " + error.http_code);
+    }
+    return new Response(
+      JSON.stringify({
+        error: "Error uploading file",
+        status: 500,
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
   }
 
   // Extraer los datos necesarios

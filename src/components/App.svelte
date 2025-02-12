@@ -1,6 +1,6 @@
 <script>
   import { Alert } from 'flowbite-svelte';
-  import { APP_STATUS, appStatus } from '../store.ts';
+  import { APP_STATUS, appStatus } from '../utils/store';
   import StepUpload from './StepUpload.svelte';
   import StepLoading from './StepLoading.svelte';
   import StepChat from './StepChat.svelte';
@@ -21,3 +21,4 @@
     <p>Unknown status</p>
  </Alert>
 {/if}
+<StepChat />

@@ -1,5 +1,5 @@
 {
-  "name": "chat-with-pdf",
+  "name": "elend-talk",
   "type": "module",
   "version": "0.0.1",
   "scripts": {
@@ -16,10 +16,12 @@
     "@astrojs/svelte": "^5.0.3",
     "@astrojs/tailwind": "^5.1.0",
     "astro": "^4.3.5",
+    "axios": "^1.7.9",
     "cloudinary": "^2.0.1",
     "marked": "^15.0.6",
     "ollama": "^0.4.9",
     "openai": "^4.27.0",
+    "pdfjs-dist": "^4.10.38",
     "rehype-slug": "^6.0.0",
     "remark-toc": "^9.0.0",
     "svelte": "^4.2.10",
@@ -28,6 +30,7 @@
     "typescript": "^5.3.3"
   },
   "devDependencies": {
+    "@types/pdfjs-dist": "^2.10.378",
     "flowbite": "^2.2.1",
     "flowbite-svelte": "^0.44.23",
     "prettier": "^3.2.5"
