@@ -1,10 +1,11 @@
-import * as pdfjs from "pdfjs-dist/legacy/build/pdf.mjs";
+import * as pdfjs from "pdfjs-dist";
+import { type PDFInfo } from "../types/types";
 
 // Configura el worker de pdfjs
-pdfjs.GlobalWorkerOptions.workerSrc = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.mjs";
+pdfjs.GlobalWorkerOptions.workerSrc = "../../node_modules/pdfjs-dist/build/pdf.worker.mjs";
 
 // Configure worker
-export async function extractTextFromPDF(file: File): Promise<string> {
+export async function extractTextFromPDF(file: File): Promise<PDFInfo> {
   const fileReader = new FileReader();
 
   // Lee el archivo como un ArrayBuffer
@@ -17,6 +18,8 @@ export async function extractTextFromPDF(file: File): Promise<string> {
   if (!fileArrayBuffer || fileArrayBuffer.byteLength === 0) throw new Error("Failed to read file");
 
   // Carga el PDF desde el ArrayBuffer
+  const url = URL.createObjectURL(file);
+  const id = url.split("/").pop() || "";
   const pdf = await pdfjs.getDocument(fileArrayBuffer).promise;
   let text = "";
 
@@ -27,15 +30,18 @@ export async function extractTextFromPDF(file: File): Promise<string> {
     text += content.items.map((item) => ("str" in item ? item.str : "")).join(" ");
   }
 
-  return text;
+  return { id, url, page: pdf.numPages, text };
 }
 
-export async function extractTextFromPDFWhitURL(url: string): Promise<string> {
+export async function extractTextFromPDFWhitURL(url: string): Promise<PDFInfo> {
   // Cargar el PDF
   const loadingTask = pdfjs.getDocument(url);
   const pdf = await loadingTask.promise;
 
+  // Extraer datos del pdf
+  const id = url.split("/").pop() || "";
   let text = "";
+  const numPages = pdf.numPages;
 
   // Iterar sobre cada página
   for (let i = 1; i <= pdf.numPages; i++) {
@@ -46,5 +52,5 @@ export async function extractTextFromPDFWhitURL(url: string): Promise<string> {
     text += content.items.map((item) => ("str" in item ? item.str : "")).join(" ");
   }
 
-  return text;
+  return { id, url, page: numPages, text };
 }

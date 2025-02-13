@@ -2,6 +2,7 @@
    import { setAppStatusLoading, setAppStatusError, setAppStatusChatMode } from '../utils/store';
    import Dropzone from "svelte-file-dropzone";
    import { extractTextFromPDF } from '..//utils/pdfjs';
+   // import { submitContext } from '../utils/context';
 
    // Archivos aceptados y rechazados
    let files = {
@@ -12,35 +13,26 @@
    async function handleFilesSelect(e) {
     try {
         const { acceptedFiles, fileRejections } = e.detail;
-        files.accepted = [...files.accepted, ...acceptedFiles];
-        files.rejected = [...files.rejected, ...fileRejections];
-        
+        files = { 
+            accepted: [...files.accepted, ...acceptedFiles],
+            rejected: [...files.rejected, ...fileRejections]
+         };
+
+         if(files.rejected.length > 0) {
+            console.error('Solo se permiten archivos PDF');
+            setAppStatusError();
+            return;
+         }
+
         setAppStatusLoading();
 
-        const text = await extractTextFromPDF(acceptedFiles[0]);
-        console.log(text);
+        const { id, url, page, text } = await extractTextFromPDF(acceptedFiles[0]);
 
-        setAppStatusChatMode({ id:"1", url: "1", page:0, text });
-         // TODO: Creditos terminados
-         // const formData = new FormData();
-         // formData.append('file', acceptedFiles[0]);
-         // Enviamos el archivo al servidor para alamcenarlo en cloudinary
-         // const res = await fetch('api/upload', {
-         //    method: 'POST',
-         //    body: formData,
-         //    headers: {
-         //       'Accept': 'application/json'
-         //    }
-         // });
-         // Si hay un error, pasamos a estado de error
-         //if(!res.ok) {
-         //    setAppStatusError();
-         //    return;
-         // }  
-
-         // // Obtenemos la respuesta del servidor
-         // const { id, url, pages } = await res.json();
-         // setAppStatusChatMode({ id, url, pages });
+        // TODO: subir contexto a public
+      //   submitContext(text, id);
+        
+        setAppStatusChatMode({ id, url, page });
+        
    } catch (error) {
       console.error(error);
       setAppStatusError();
@@ -56,10 +48,3 @@
       on:drop={handleFilesSelect}>
    </Dropzone>
 {/if}
-
-<!-- Mostramos los archivos aceptados -->
-<ol>
-  {#each files.accepted as item}
-    <li>{item.name}</li>
-  {/each}
-</ol>

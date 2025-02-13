@@ -21,4 +21,3 @@
     <p>Unknown status</p>
  </Alert>
 {/if}
-<StepChat />

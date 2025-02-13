@@ -63,3 +63,25 @@ export type AppStatusInfo = {
   pages: number;
   text: string;
 };
+
+export type PDFInfo = {
+  id: string;
+  url: string;
+  page: number;
+  text: string;
+};
+
+type File = {
+  path: string;
+  name: string;
+  lastModified: number;
+  lastModifiedDate: Date;
+  webkitRelativePath: string;
+  size: number;
+  type: string;
+};
+
+export type Files = {
+  accepted: File[];
+  rejected: File[];
+};

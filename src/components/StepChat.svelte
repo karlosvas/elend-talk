@@ -5,7 +5,8 @@
    import { submitOllama } from '../services/ollamaService';
    import { writable } from 'svelte/store';
    import { marked } from 'marked';
-   const { id, url, pages, text } = $appStatusInfo;
+   
+   const { id, url, pages } = $appStatusInfo;
 
    // Variables de estado
    export let loading = writable({value: false});
@@ -25,6 +26,10 @@
 
   $: htmlContent = $answer?.value ? marked($answer.value) : '';
 </script>
+
+<!-- Mostramos el PDF si hay una URL disponible -->
+<h1>Archivos:</h1>
+<iframe src={url} width="100px" height="auto" title="Vista previa del PDF"></iframe>
 
 <!-- Mostramos las imágenes de las páginas del PDF -->
 <div class="flex flex-row gap-4 overflow-x-auto p-4">
