@@ -22,15 +22,29 @@ export async function extractTextFromPDF(file: File): Promise<PDFInfo> {
   const id = url.split("/").pop() || "";
   const pdf = await pdfjs.getDocument(fileArrayBuffer).promise;
   let text = "";
+  const images: string[] = [];
 
   // Itera sobre cada página del PDF
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i);
     const content = await page.getTextContent();
     text += content.items.map((item) => ("str" in item ? item.str : "")).join(" ");
+
+    // Renderiza la página a un canvas
+    const viewport = page.getViewport({ scale: 2.0 });
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    await page.render({ canvasContext: context as any, viewport }).promise;
+
+    // Convierte el canvas a una imagen PNG usando html2canvas
+    const pngBase64 = canvas.toDataURL("image/png");
+    images.push(pngBase64);
   }
 
-  return { id, url, page: pdf.numPages, text };
+  return { id, url, pages: pdf.numPages, text, images };
 }
 
 export async function extractTextFromPDFWhitURL(url: string): Promise<PDFInfo> {
@@ -41,7 +55,7 @@ export async function extractTextFromPDFWhitURL(url: string): Promise<PDFInfo> {
   // Extraer datos del pdf
   const id = url.split("/").pop() || "";
   let text = "";
-  const numPages = pdf.numPages;
+  const images: string[] = [];
 
   // Iterar sobre cada página
   for (let i = 1; i <= pdf.numPages; i++) {
@@ -50,7 +64,19 @@ export async function extractTextFromPDFWhitURL(url: string): Promise<PDFInfo> {
 
     // Concatenar el texto de cada página
     text += content.items.map((item) => ("str" in item ? item.str : "")).join(" ");
+    // Renderiza la página a un canvas
+    const viewport = page.getViewport({ scale: 2.0 });
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    canvas.width = viewport.width;
+    canvas.height = viewport.height;
+
+    await page.render({ canvasContext: context as any, viewport }).promise;
+
+    // Convierte el canvas a una imagen PNG usando html2canvas
+    const pngBase64 = canvas.toDataURL("image/png");
+    images.push(pngBase64);
   }
 
-  return { id, url, page: numPages, text };
+  return { id, url, pages: pdf.numPages, text, images };
 }

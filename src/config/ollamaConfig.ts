@@ -28,6 +28,7 @@ export class OllamaClient {
 
   async submitChat(params: { model: string; messages: LogHistory[] }) {
     try {
+      console.log("submitChat", params);
       const response = await fetch(`${this.baseUrl}/api/chat`, {
         method: "POST",
         headers: {
@@ -47,18 +48,33 @@ export class OllamaClient {
   }
 }
 
-export const history = [
-  {
-    role: "system",
-    content:
-      'Eres un investigador español experimentado, experto en interpretar y responder preguntas basadas en las fuentes proporcionadas. Utilizando el contexto proporcionado entre las etiquetas <context></context>, genera una respuesta concisa para una pregunta rodeada con las etiquetas <question></question>. Debes usar únicamente información del contexto. Usa un tono imparcial y periodístico. No repitas texto. Si no hay nada en el contexto relevante para la pregunta en cuestión, simplemente di "No lo sé". No intentes inventar una respuesta. Cualquier cosa entre los siguientes bloques html context se recupera de un banco de conocimientos, no es parte de la conversación con el usuario.',
-  },
-];
+export class ChatHistory {
+  private static instance: ChatHistory;
+  private readonly messages: LogHistory[] = [];
 
-// TODO: Crear el modelo de ollama
-// const modelFile = `
-// FROM llama2
-// SYSTEM "Eres un investigador español experimentado, experto en interpretar y responder preguntas basadas en las fuentes proporcionadas. Utilizando el contexto proporcionado entre las etiquetas <context></context>, genera una respuesta concisa para una pregunta rodeada con las etiquetas <question></question>. Debes usar únicamente información del contexto. Usa un tono imparcial y periodístico. No repitas texto. Si no hay nada en el contexto relevante para la pregunta en cuestión, simplemente di "No lo sé". No intentes inventar una respuesta. Cualquier cosa entre los siguientes bloques html context se recupera de un banco de conocimientos, no es parte de la conversación con el usuario."
-// `;
+  private constructor() {
+    this.messages = [
+      {
+        role: "system",
+        content:
+          'Eres un investigador español experimentado, experto en interpretar y responder preguntas basadas en las fuentes proporcionadas. Utilizando el contexto proporcionado entre las etiquetas <context></context> que viene de los PDFs enviados por el usuario, genera una respuesta concisa para una pregunta rodeada con las etiquetas <question></question>. Debes usar únicamente información del contexto. Usa un tono imparcial y periodístico. No repitas texto. Si no hay nada en el contexto relevante para la pregunta en cuestión, simplemente di "No lo sé". No intentes inventar una respuesta. Cualquier cosa entre los siguientes bloques html context se recupera de un banco de conocimientos, no es parte de la conversación con el usuario.',
+      },
+    ];
+  }
 
-// export const modelo_ollama = await ollama.create({ model: "llama2", modelfile: modelFile });
+  static getInstance(): ChatHistory {
+    if (!ChatHistory.instance) {
+      ChatHistory.instance = new ChatHistory();
+    }
+    return ChatHistory.instance;
+  }
+
+  addMessage(role: "system" | "user" | "assistant", content: string): void {
+    this.messages.push({ role, content });
+  }
+
+  getHistory(): readonly LogHistory[] {
+    return [...this.messages];
+  }
+}
+export const chatHistory = ChatHistory.getInstance();

@@ -1,6 +1,6 @@
 <script>
   import { Alert } from 'flowbite-svelte';
-  import { APP_STATUS, appStatus } from '../utils/store';
+  import { APP_STATUS, appStatus } from '@/utils/store';
   import StepUpload from './StepUpload.svelte';
   import StepLoading from './StepLoading.svelte';
   import StepChat from './StepChat.svelte';

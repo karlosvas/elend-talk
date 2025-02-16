@@ -1,26 +1,11 @@
-import { setAppStatusError } from "../utils/store";
-import { type SubmitOllamaParams } from "../types/types";
+import { setAppStatusError } from "@/utils/store";
+import { type SubmitOllamaParams } from "@/types/types";
 
-// Función para enviar la pregunta con ollama
 export const submitOllama = async ({ event, loading, answer }: SubmitOllamaParams): Promise<void> => {
   event.preventDefault();
 
-  const updateAnswer = (newText: string) => {
-    answer.update((current) => {
-      return { value: current.value + newText };
-    });
-  };
-
-  const updateLoading = (newLoading: boolean) => {
-    loading.update(() => {
-      return { value: newLoading };
-    });
-  };
-
   // Elimanar el mensaje writeable
-  answer.update(() => {
-    return { value: "" };
-  });
+  answer.set({ value: "" });
 
   // Obtener pregunta y generar un identificador único
   const question = event.target.question.value;
@@ -39,11 +24,13 @@ export const submitOllama = async ({ event, loading, answer }: SubmitOllamaParam
         if (data === "END") {
           // Añadir un salto de linea al terminar el mensaje
           eventSource.close();
-          updateLoading(false);
+          loading.set({ value: false });
           return;
         }
 
-        updateAnswer(data.message.content);
+        answer.update((current) => {
+          return { value: current.value + data.message.content };
+        });
       } catch (error) {
         console.error("Error parsing message:", error);
       }
@@ -52,11 +39,11 @@ export const submitOllama = async ({ event, loading, answer }: SubmitOllamaParam
     eventSource.onerror = (error) => {
       console.error("EventSource error:", error);
       eventSource.close();
-      updateLoading(false);
+      loading.set({ value: false });
     };
   } catch (error) {
     console.error("Stream error:", error);
-    updateLoading(false);
+    loading.set({ value: false });
     setAppStatusError("Error connecting to ollama");
   }
 };

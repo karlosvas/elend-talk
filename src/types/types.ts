@@ -28,7 +28,7 @@ export interface OllamaConfig {
 }
 
 export type LogHistory = {
-  role: string;
+  role: "assistant" | "user" | "system";
   content: string;
 };
 
@@ -57,19 +57,13 @@ export interface OllamaCompletionResponse {
   eval_duration: number;
 }
 
-export type AppStatusInfo = {
+export type PDFInfo = Writable<{
   id: string;
   url: string;
   pages: number;
   text: string;
-};
-
-export type PDFInfo = {
-  id: string;
-  url: string;
-  page: number;
-  text: string;
-};
+  images: string[];
+}>;
 
 type File = {
   path: string;

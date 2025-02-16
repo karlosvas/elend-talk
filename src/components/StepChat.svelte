@@ -1,19 +1,15 @@
 <script>
    import { Input,  Label, Spinner} from 'flowbite-svelte';
-   import { appStatusInfo, setAppStatusError } from '../utils/store';
-   import { getCloudinaryImg } from '../services/cloudinaryService';
-   import { submitOllama } from '../services/ollamaService';
+   import { appStatusInfo, setAppStatusError } from '@/utils/store';
+   import { submitOllama } from '@/services/ollamaService';
    import { writable } from 'svelte/store';
    import { marked } from 'marked';
    
-   const { id, url, pages } = $appStatusInfo;
+   const { id, url, pages, text, images } = $appStatusInfo;
 
    // Variables de estado
    export let loading = writable({value: false});
    export let answer = writable({value: ""});
-
-   // Función para obtener las imágenes de cloudinary, devuelbe string[]
-   let images = getCloudinaryImg(url, pages);
 
    // Datos adicionales que se enviarán al servidor, clicando en el botón de enviar
    const handleSubmit =  async (event) => {
@@ -27,15 +23,11 @@
   $: htmlContent = $answer?.value ? marked($answer.value) : '';
 </script>
 
-<!-- Mostramos el PDF si hay una URL disponible -->
-<h1>Archivos:</h1>
-<iframe src={url} width="100px" height="auto" title="Vista previa del PDF"></iframe>
-
 <!-- Mostramos las imágenes de las páginas del PDF -->
 <div class="flex flex-row gap-4 overflow-x-auto p-4">
-   {#each images as image }
+   {#each images as url }
       <img 
-         src={image} 
+         src={url} 
          alt="PDF page" 
          class="rounded w-auto h-64 object-contain"
       />

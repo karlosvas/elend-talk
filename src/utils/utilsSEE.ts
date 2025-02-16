@@ -1,6 +1,6 @@
-import { type UploadApiResponse } from "cloudinary";
-import cloudinaryInstance from "../config/cloudinaryConfig";
-import { type Message } from "../types/types";
+// import { type UploadApiResponse } from "cloudinary";
+// import cloudinaryInstance from "../config/cloudinaryConfig";
+import { type Message } from "@/types/types";
 
 // Server Sent Events
 // Función para manejar Server-Sent Events (SSE)
@@ -41,21 +41,21 @@ export const responseSSE = (
 };
 
 // Subida de flujo a Cloudinary, convertir a binario y almacenarlo en un búfer.
-export const uploadStream = async (buffer: Uint8Array): Promise<UploadApiResponse | any> => {
-  return new Promise((resolve, reject) => {
-    const options = {
-      folder: "pdf",
-      ocr: "adv_ocr",
-    };
-    // Subir el flujo a Cloudinary
-    cloudinaryInstance.uploader
-      .upload_stream(options, (error, result) => {
-        if (result) return resolve(result);
-        reject(error);
-      })
-      .end(buffer);
-  });
-};
+// export const uploadStream = async (buffer: Uint8Array): Promise<UploadApiResponse | any> => {
+//   return new Promise((resolve, reject) => {
+//     const options = {
+//       folder: "pdf",
+//       ocr: "adv_ocr",
+//     };
+//     // Subir el flujo a Cloudinary
+//     cloudinaryInstance.uploader
+//       .upload_stream(options, (error, result) => {
+//         if (result) return resolve(result);
+//         reject(error);
+//       })
+//       .end(buffer);
+//   });
+// };
 
 // Procesar un chunk, obtenido al procesar el texto repsuesta
 const processChunk = (chunk: string, newResponseAssistant: Message, sendEvent: (event: any) => void) => {

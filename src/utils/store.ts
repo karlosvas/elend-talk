@@ -1,4 +1,4 @@
-import { type AppStatusInfo } from "@/types/types";
+import { type PDFInfo } from "@/types/types";
 import { writable } from "svelte/store";
 
 export const APP_STATUS = {
@@ -9,7 +9,7 @@ export const APP_STATUS = {
 };
 
 export const appStatus = writable(APP_STATUS.INIT);
-export const appStatusInfo = writable({ id: "", url: "", pages: 0, text: "" });
+export const appStatusInfo: PDFInfo = writable({ id: "", url: "", pages: 0, text: "", images: [] });
 
 // Store actions
 export const setAppStatusLoading = () => {
@@ -18,7 +18,6 @@ export const setAppStatusLoading = () => {
 export const setAppStatusError = (p0: string) => {
   appStatus.set(APP_STATUS.ERROR);
 };
-export const setAppStatusChatMode = ({ id, url, pages, text }: AppStatusInfo) => {
+export const setAppStatusChatMode = () => {
   appStatus.set(APP_STATUS.CHAT_MODE);
-  appStatusInfo.set({ id, url, pages, text });
 };
