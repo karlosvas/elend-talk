@@ -3,6 +3,7 @@
 Welcome to our amazing Elend Talk web application!
 
 Are you ready to interact with your PDF documents in a whole new way? Look no further! With our cutting-edge technology, you can upload any PDF and start asking questions about its content.
+![PreviewAPP](./public/preview.png)
 
 ## Features 🚀
 

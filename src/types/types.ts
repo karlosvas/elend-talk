@@ -57,7 +57,15 @@ export interface OllamaCompletionResponse {
   eval_duration: number;
 }
 
-export type PDFInfo = Writable<{
+export type PDFInfo = {
+  id: string;
+  url: string;
+  pages: number;
+  text: string;
+  images: string[];
+};
+
+export type PDFInfoEstatus = Writable<{
   id: string;
   url: string;
   pages: number;

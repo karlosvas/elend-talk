@@ -1,13 +1,13 @@
 import { type APIRoute } from "astro";
 import { processStream, responseSSE } from "@/utils/utilsSEE.ts";
-import { OllamaClient, chatHistory } from "@/config/ollamaConfig.ts";
+import { chatHistory, ollamaClient } from "@/config/ollamaConfig.ts";
 import { type Message } from "@/types/types.ts";
 import { MODEL_OLLAMA } from "@/config/constants.ts";
 
-const ollama = new OllamaClient();
-
 // Enpoint para la API de ollama
 export const GET: APIRoute = async ({ request }) => {
+  console.log(chatHistory.getHistory());
+
   // Obtener la pregunta de la URL
   const url = new URL(request.url);
   const question = url.searchParams.get("question");
@@ -26,10 +26,9 @@ export const GET: APIRoute = async ({ request }) => {
     };
 
     // Historico de mensajes
-    const messages = chatHistory.getHistory();
     try {
       // Obtenemos la repuesta de la api de ollama
-      const response = await ollama.submitChat({ model: MODEL_OLLAMA, messages: [...messages] });
+      const response = await ollamaClient.submitChat({ model: MODEL_OLLAMA, messages: [...chatHistory.getHistory()] });
       // getReader es un método de Response que devuelbe un ReadableStreamDefaultReader.
       // Este lector permite leer el flujo de datos de la respuesta de manera controlada, chunk por chunk.
       if (!response.body) throw new Error("Response body is null");

@@ -1,5 +1,5 @@
 import * as pdfjs from "pdfjs-dist";
-import { type PDFInfo } from "../types/types";
+import { type PDFInfo } from "@/types/types";
 
 // Configura el worker de pdfjs
 pdfjs.GlobalWorkerOptions.workerSrc = "../../node_modules/pdfjs-dist/build/pdf.worker.mjs";

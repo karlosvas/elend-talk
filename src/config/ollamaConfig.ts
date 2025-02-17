@@ -2,6 +2,7 @@ import { type LogHistory, type ModelCreationParams, type OllamaResponse } from "
 import axios, { type AxiosInstance } from "axios";
 
 export class OllamaClient {
+  public static instance: OllamaClient;
   private client: AxiosInstance;
   private baseUrl: string = "http://localhost:11434";
 
@@ -12,6 +13,13 @@ export class OllamaClient {
         "Content-Type": "application/json",
       },
     });
+  }
+
+  static getInstance(): OllamaClient {
+    if (!OllamaClient.instance) {
+      OllamaClient.instance = new OllamaClient();
+    }
+    return OllamaClient.instance;
   }
 
   async createModel(params: ModelCreationParams): Promise<OllamaResponse> {
@@ -47,6 +55,7 @@ export class OllamaClient {
     }
   }
 }
+export const ollamaClient = OllamaClient.getInstance();
 
 export class ChatHistory {
   private static instance: ChatHistory;

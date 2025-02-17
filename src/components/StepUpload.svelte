@@ -1,65 +1,59 @@
-<script>
+<script lang="ts">
    import { setAppStatusLoading, setAppStatusError, setAppStatusChatMode } from '@/utils/store';
    import Dropzone from "svelte-file-dropzone";
    import { extractTextFromPDF } from '@/utils/pdfjs';
    import { appStatusInfo } from '@/utils/store';
+  import  { type PDFInfo } from '@/types/types';
 
    // Archivos aceptados y rechazados
-   let files = {
+   let files: Record<string, any[]> = {
       accepted: [],
       rejected: []
    };
 
-   async function handleFilesSelect(e) {
+   // Manejador de archivos seleccionados
+   async function handleFilesSelect(e: CustomEvent) {
     try {
-        const { acceptedFiles, fileRejections } = e.detail;
-        files = { 
+         // Vlaidamos que solo se haya subido un archivo y que sea un pdf
+         const { acceptedFiles, fileRejections } = e.detail;
+         files = { 
             accepted: [...files.accepted, ...acceptedFiles],
             rejected: [...files.rejected, ...fileRejections]
          };
+         if(files.rejected.length > 0) 
+            throw new Error("Solo se permiten archivos PDF");
 
-         if(files.rejected.length > 0) {
-            console.error('Solo se permiten archivos PDF');
-            setAppStatusError();
-            return;
-         }
+         // Cambiamos el estado de la aplicacion a loading para activar el spinner
+         setAppStatusLoading();
 
-        setAppStatusLoading();
-
-         // Extreamos informacion del pfd, se lo damos al estado de la aplicacion y lo subimos al servidor
-         const newInfo = await extractTextFromPDF(acceptedFiles[0]);
+         // Extreamos información del pfd, se lo damos al estado de la aplicacion y lo subimos al servidor
+         const newInfo: PDFInfo = await extractTextFromPDF(acceptedFiles[0]);
+         // Añadimos el contexto al historial de chat de ollama el contexto
          appStatusInfo.set(newInfo);
 
-         // Lo almacenamos en public
+         // Subimos el contexto al chat de ollama
          try {
-            const info = {
-               id: newInfo.id,
-               context: newInfo.text
-            }
-            const response = await fetch('/api//upload', {
+            const response = await fetch('/api/upload', {
                method: 'POST',
                headers: {
                   'Content-Type': 'application/json'
                },
-               body: JSON.stringify(info)
+               body: JSON.stringify({ context: newInfo.text })
             });
-
-            if(!response.ok) {
-               console.error('Error al subir el archivo');
-               setAppStatusError();
-               return;
-            }
-
-         }  catch(e){
-            console.error(e);
-            setAppStatusError();
+            if(!response.ok) 
+               throw new Error("Error uploading file");
+         } catch (error) {
+            console.error(error);
          }
          
          // Si todo ha salido bien pasamos al modo chat
          setAppStatusChatMode();
-   } catch (error) {
+   } catch (error: unknown) {
       console.error(error);
-      setAppStatusError();
+      if(error instanceof Error)
+         setAppStatusError(error.message);
+      else
+         setAppStatusError("Error uploading file");
    }
 }
 </script>
