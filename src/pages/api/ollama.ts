@@ -6,8 +6,6 @@ import { MODEL_OLLAMA } from "@/config/constants.ts";
 
 // Enpoint para la API de ollama
 export const GET: APIRoute = async ({ request }) => {
-  console.log(chatHistory.getHistory());
-
   // Obtener la pregunta de la URL
   const url = new URL(request.url);
   const question = url.searchParams.get("question");

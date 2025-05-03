@@ -4,4 +4,3 @@ export const IMAGE_DIMENSIONS = {
   height: 540,
 };
 export const MODEL_OLLAMA = "llama3.2";
-// export const MODEL_OLLAMA = "deepseek-r1:8b";

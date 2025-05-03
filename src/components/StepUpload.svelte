@@ -33,6 +33,9 @@
 
          // Subimos el contexto al chat de ollama
          try {
+            if(!newInfo.text) 
+               throw new Error("No se ha podido extraer el texto del PDF");
+               console.log(newInfo.text);
             const response = await fetch('/api/upload', {
                method: 'POST',
                headers: {

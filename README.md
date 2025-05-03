@@ -2,8 +2,8 @@
 
 Welcome to our amazing Elend Talk web application!
 
-Are you ready to interact with your PDF documents in a whole new way? Look no further! With our cutting-edge technology, you can upload any PDF and start asking questions about its content.
-![PreviewAPP](./public/preview.png)
+Are you ready to interact with your PDF documents in a whole new way? Look no further! With our cutting-edge technology, you can upload any PDF and start asking questions about its content. using the power of Ollama our app will extract the text from your PDF and provide you with instant answers to your queries. It's like having a personal assistant for your documents!
+![PreviewAPP](./public/preview.webp)
 
 ## Features 🚀
 
@@ -44,25 +44,30 @@ Download and run the Windows installer from: https://ollama.ai/download/windows
 
 ```bash
 curl https://ollama.ai/install.sh | sh
-ollama serve
-ollama pull llama3.2:latest
 ```
 
-1. Clone this repository:
+### Setup Ollama
+
+1. Obtain the Ollama model you want to use.
+
+```bash
+sudo ollama serve
+ollama pull llama3.2:latest # for example
+## To use a different model, update the model name in `src/config/constants.ts`.
+export const MODEL_OLLAMA = "llama3.2";
+```
+
+2. Clone this repository:
 
 ```bash
 git clone https://github.com/your-username/pdf-to-talk.git
 ```
 
-2. Install dependencies:
+3. Install dependencies, compile project and start the application:
 
 ```bash
 pnpm install
-```
-
-3. Start the application:
-
-```bash
+pnpm run build
 pnpm run dev
 ```
 
@@ -80,4 +85,4 @@ This project is licensed under the GPL License.
 
 ## Contact Us 📧
 
-Got questions or suggestions? Reach out to us at carlosvas@gmail.com. We'd love to hear from you!
+Got questions or suggestions? Reach out to us at carlosvassan@gmail.com. We'd love to hear from you!
