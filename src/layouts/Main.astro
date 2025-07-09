@@ -1,0 +1,90 @@
+---
+import App from "../components/App.svelte";
+import { OllamaModel } from "../types/types";
+---
+
+<main
+  class="grid justify-items-center min-h-screen py-20 bg-[linear-gradient(to_right,rgba(100,145,230,1),rgba(135,120,300,1),rgba(135,120,300,1),rgba(100,145,230,1))]"
+>
+  <div class="mb-8 flex flex-col items-end pr-10 w-full mr-0 lg:mr-96 relative">
+    <label for="model-select" class="mb-2 text-lg font-semibold text-white">Select your model</label>
+    <img src="" alt="" id="ia-icon" class="absolute top-8 right-64 w-auto h-10 hidden" />
+    <select
+      id="model-select"
+      name="model"
+      class="rounded-lg border px-4 py-2 text-base bg-gray-800 text-white shadow focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+    >
+      <option value="" disabled selected>Select your model</option>
+      <option value={OllamaModel.DeepSeek}>Deepseek R1</option>
+      <option value={OllamaModel.Llama3}>Llama 3</option>
+      <option value={OllamaModel.Llama3_2}>Llama 3.2</option>
+    </select>
+  </div>
+  <section class="container max-w-xl min-h-64">
+    <App client:idle />
+  </section>
+</main>
+
+<script>
+  import { setAppStatusInit } from "../utils/store";
+  import { OllamaModel } from "../types/types";
+
+  // Obtenemos de las cookies el modelo seleccionado
+  const modelSelectCookies = document.cookie.split("; ").find((row) => row.startsWith("selectedModel=")) as
+    | string
+    | undefined;
+  const appSection = document.querySelector("section.container") as HTMLDivElement | null;
+  const modelSelect = document.getElementById("model-select") as HTMLSelectElement | null;
+
+  // verificamos que haya algun modelo seleccionado
+  if (modelSelectCookies) {
+    // Si hay un modelo seleccionado, lo mostramos en el select
+    const selectedModel = modelSelectCookies.split("=")[1];
+    if (modelSelect) modelSelect.value = selectedModel;
+    // Mostramos la sección del componente App
+    appSection?.classList.remove("hidden");
+    // Mostramos el icono correspondiente al modelo seleccionado
+    setIcons();
+  }
+
+  // Función para manejar el cambio de modelo seleccionado
+  function setSelectedModel(event: Event) {
+    const selectedModel = (event.target as HTMLSelectElement).value;
+    // Guardamos el modelo seleccionado en las cookies
+    document.cookie = `selectedModel=${selectedModel}; path=/; max-age=31536000`; // 1 año de expiración
+    // Mostramos la sección del componente App
+    appSection?.classList.remove("hidden");
+  }
+
+  // Función para establecer los iconos según el modelo seleccionado
+  function setIcons() {
+    const icon = document.getElementById("ia-icon") as HTMLImageElement | null;
+    const selectedModel = modelSelect?.value;
+
+    if (icon && selectedModel) {
+      switch (selectedModel) {
+        case OllamaModel.DeepSeek:
+          icon.src = "/deepseek.webp";
+          break;
+        case OllamaModel.Llama3:
+          icon.src = "/ollama.webp";
+          break;
+        case OllamaModel.Llama3_2:
+          icon.src = "/ollama.webp";
+          break;
+        default:
+          icon.src = "";
+      }
+      icon.classList.remove("hidden");
+      setAppStatusInit();
+    }
+  }
+
+  function handleSelectChange(event: Event) {
+    setSelectedModel(event);
+    setIcons();
+  }
+
+  // Listener de cambio del select
+  document.getElementById("model-select")?.addEventListener("change", (event) => handleSelectChange(event));
+</script>

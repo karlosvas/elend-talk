@@ -1,4 +1,4 @@
-import { type PDFInfo, type PDFInfoEstatus } from "@/types/types";
+import { type PDFInfoEstatus } from "@/types/types";
 import { writable, type Writable } from "svelte/store";
 
 // Constants
@@ -27,4 +27,9 @@ export const setAppStatusError = (message: string) => {
 
 export const setAppStatusChatMode = () => {
   appStatus.set(APP_STATUS.CHAT_MODE);
+};
+
+export const setAppStatusInit = () => {
+  appStatus.set(APP_STATUS.INIT);
+  errorMessage.set(""); // Limpiamos el mensaje de error
 };

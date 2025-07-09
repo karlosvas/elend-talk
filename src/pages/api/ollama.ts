@@ -2,15 +2,15 @@ import { type APIRoute } from "astro";
 import { processStream, responseSSE } from "@/utils/utilsSEE.ts";
 import { chatHistory, ollamaClient } from "@/config/ollamaConfig.ts";
 import { type Message } from "@/types/types.ts";
-import { MODEL_OLLAMA } from "@/config/constants.ts";
 
 // Enpoint para la API de ollama
 export const GET: APIRoute = async ({ request }) => {
   // Obtener la pregunta de la URL
   const url = new URL(request.url);
   const question = url.searchParams.get("question");
+  const MODEL_OLLAMA = url.searchParams.get("model");
 
-  if (!question) return new Response("Missing parameters", { status: 400 });
+  if (!question || !MODEL_OLLAMA) return new Response("Missing parameters", { status: 400 });
 
   // Respuesta SSE (Server Sent Event)
   return responseSSE({ request }, async (sendEvent) => {

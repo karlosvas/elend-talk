@@ -36,13 +36,31 @@ export class OllamaClient {
 
   async submitChat(params: { model: string; messages: LogHistory[] }) {
     try {
-      console.log("submitChat", params);
+      // Detectar si es DeepSeek y configurar parámetros específicos
+      const isDeepSeek = params.model.toLowerCase().includes("deepseek");
+      const requestBody = {
+        ...params,
+        stream: true,
+        ...(isDeepSeek && {
+          options: {
+            temperature: 0.7,
+            top_p: 0.9,
+            num_predict: -1,
+            stop: ["<|im_end|>", "<|endoftext|>"],
+            repeat_penalty: 1.1,
+            top_k: 40,
+            verbose: false,
+            max_tokens: 2048,
+          },
+        }),
+      };
+
       const response = await fetch(`${this.baseUrl}/api/chat`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(params),
+        body: JSON.stringify(requestBody),
       });
       if (!response.ok) throw new Error(`Ollama API error`);
       if (!response.body) throw new Error("Response body is empty");

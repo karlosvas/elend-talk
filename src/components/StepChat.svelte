@@ -1,10 +1,13 @@
 <script lang="ts">
-   import { Input,  Label, Spinner} from 'flowbite-svelte';
+   import { Input,  Label} from 'flowbite-svelte';
    import { writable, type Writable } from 'svelte/store';
    import { marked } from 'marked';
    import { appStatusInfo, setAppStatusError } from '@/utils/store';
    import { submitOllama } from '@/services/ollamaService';
-   
+   import { stringToOllamaModel, type OllamaModel } from '@/types/types';
+   import { getCookie } from '@/utils/cookies';
+   import StepLoading from './StepLoading.svelte';
+
    // Variables de estado, cargando y procesando respuesta respuesta
    export let loading:Writable<{ value: boolean }>  = writable({value: false});
    export let answer:Writable<{ value: string }> = writable({value: ""});
@@ -13,7 +16,22 @@
    const handleSubmit =  async (event: any) => {
       event.preventDefault();
       try{
-         await submitOllama({ event, loading, answer });
+         
+         // Obtenemos el modelo de la cookie "selectedModel", no del valor del select
+         const model = getCookie("selectedModel") as string || undefined;
+         if(!model) {
+            setAppStatusError("You must select a model before asking a question");
+            return;
+         }
+         
+         const ollamaModel = stringToOllamaModel(model) as OllamaModel || null;
+         if(!ollamaModel) {
+            setAppStatusError("Invalid model selected");
+            return;
+         }
+         
+         loading.set({ value: true });
+         await submitOllama({ event, loading, answer, model: ollamaModel });
       } catch (error) {
          setAppStatusError(error as string);
       }
@@ -38,18 +56,11 @@
   <Label for="question" class="block mb-2 text-white">Leave your question here</Label>
   <Input 
     id="question"
+    name="question"
     required
     placeholder="What is this document about?"
   ></Input>
 </form>
-
-<!-- Spinner de carga -->
-{#if $loading.value}
-   <div class="felx justify-center items-center flex-col gap-y-2">
-      <Spinner />
-      <p class="opacity-75">Thinking</p>
-   </div>
-{/if}
 
 <!-- Mostramos la respuesta de ollama -->
 {#if $answer.value.length > 0}
@@ -58,5 +69,9 @@
       <div class="text-lg text-gray-300 whitespace-pre-wrap break-words hyphens-auto">
          {@html htmlContent}
       </div>
+   </div>
+{:else if $loading.value}
+   <div class="mt-10">
+      <StepLoading />
    </div>
 {/if}

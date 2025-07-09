@@ -5,7 +5,6 @@ export const POST: APIRoute = async ({ request }) => {
   try {
     // Leer el cuerpo de la solicitud
     const { context } = await request.json();
-    console.log("Context received:", context);
     chatHistory.addMessage("system", `<context>${context}</context>`);
 
     // Return 204 no content

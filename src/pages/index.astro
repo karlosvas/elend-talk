@@ -1,27 +1,12 @@
 ---
 import Layout from "../layouts/Layout.astro";
-import App from "../components/App.svelte";
+import Header from "../layouts/Header.astro";
+import Footer from "../layouts/Footer.astro";
+import Main from "../layouts/Main.astro";
 ---
 
 <Layout title="ElendTalk">
-  <div
-    class="fixed top-0 z-[-2] h-full w-screen bg-[linear-gradient(to_right,rgba(100,145,230,1),rgba(135,120,300,1),rgba(135,120,300,1),rgba(100,145,230,1))]"
-  >
-  </div>
-  <header>
-    <div class="flex justify-center items-center w-full h-48 bg-gradient-to-b from-[#000000] to-[#000000cc]">
-      <h1 class="text-6xl font-bold text-center text-white">ElendTalk</h1>
-    </div>
-  </header>
-  <main class="grid justify-items-center min-h-screen mb-20 mt-20">
-    <section class="container w-[1000px] max-w-xl min-h-64">
-      <App client:idle />
-    </section>
-  </main>
-  <footer
-    class="flex flex-col justify-center items-center w-full absolute botoom-0 bg-gradient-to-b from-[#000000] to-[#000000cc] h-36"
-  >
-    <p class="text-white text-center">© 2025 ElendTalk</p>
-    <p class="text-white text-center">Email: carlosvassan@gmail.com</p>
-  </footer>
+  <Header />
+  <Main />
+  <Footer />
 </Layout>

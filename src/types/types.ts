@@ -10,6 +10,7 @@ export interface SubmitOllamaParams {
   };
   loading: Writable<{ value: boolean }>;
   answer: Writable<{ value: string }>;
+  model: OllamaModel;
 }
 
 export interface ModelCreationParams {
@@ -87,3 +88,32 @@ export type Files = {
   accepted: File[];
   rejected: File[];
 };
+
+export enum OllamaModel {
+  Llama3 = "llama3",
+  Llama3_2 = "llama3.2",
+  DeepSeek = "deepseek-r1",
+}
+
+// Función para convertir string a OllamaModel
+export function stringToOllamaModel(modelString: string): OllamaModel | null {
+  switch (modelString) {
+    case "llama3":
+      return OllamaModel.Llama3;
+    case "llama3.2":
+      return OllamaModel.Llama3_2;
+    case "deepseek-r1":
+      return OllamaModel.DeepSeek;
+    default:
+      return null; // Retorna null si no encuentra el modelo
+  }
+}
+
+// Función alternativa más robusta con validación
+export function getOllamaModelFromString(modelString: string): OllamaModel {
+  const model = stringToOllamaModel(modelString);
+  if (!model) {
+    throw new Error(`Invalid model: ${modelString}`);
+  }
+  return model;
+}

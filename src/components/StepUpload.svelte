@@ -14,6 +14,11 @@
    // Manejador de archivos seleccionados
    async function handleFilesSelect(e: CustomEvent) {
     try {
+      const modelSelect = document.getElementById("model-select") as HTMLSelectElement | null;
+
+      if(modelSelect && modelSelect.value === "") 
+            throw new Error("You must select a model before uploading a file");
+
          // Vlaidamos que solo se haya subido un archivo y que sea un pdf
          const { acceptedFiles, fileRejections } = e.detail;
          files = { 
@@ -21,7 +26,7 @@
             rejected: [...files.rejected, ...fileRejections]
          };
          if(files.rejected.length > 0) 
-            throw new Error("Solo se permiten archivos PDF");
+            throw new Error("Only PDF files are allowed");
 
          // Cambiamos el estado de la aplicacion a loading para activar el spinner
          setAppStatusLoading();
@@ -34,8 +39,8 @@
          // Subimos el contexto al chat de ollama
          try {
             if(!newInfo.text) 
-               throw new Error("No se ha podido extraer el texto del PDF");
-               console.log(newInfo.text);
+               throw new Error("The text could not be extracted from the PDF");
+
             const response = await fetch('/api/upload', {
                method: 'POST',
                headers: {
@@ -43,6 +48,7 @@
                },
                body: JSON.stringify({ context: newInfo.text })
             });
+
             if(!response.ok) 
                throw new Error("Error uploading file");
          } catch (error) {

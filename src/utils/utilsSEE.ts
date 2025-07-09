@@ -13,20 +13,50 @@ export const responseSSE = (
     async start(controller) {
       // Codificador de texto para convertir strings a Uint8Array
       const encoder = new TextEncoder();
+      let isClosed = false;
 
       // Función para enviar eventos al cliente
       const sendEvent = (data: any) => {
-        const message = `data: ${JSON.stringify(data)}\n\n`;
-        controller.enqueue(encoder.encode(message));
+        try {
+          // Verificar si el controller aún está activo
+          if (!isClosed && controller.desiredSize !== null) {
+            const message = `data: ${JSON.stringify(data)}\n\n`;
+            controller.enqueue(encoder.encode(message));
+          }
+        } catch (error) {
+          console.warn("Error sending event:", error);
+          isClosed = true;
+        }
       };
-
-      // Ejecutar el callback con la función sendEvent
-      callback(sendEvent);
 
       // Manejar el cierre de la conexión
       request.signal.addEventListener("abort", () => {
-        controller.close();
+        isClosed = true;
+        try {
+          if (controller.desiredSize !== null) {
+            controller.close();
+          }
+        } catch (error) {
+          console.warn("Error closing controller:", error);
+        }
       });
+
+      try {
+        // Ejecutar el callback con la función sendEvent
+        await callback(sendEvent);
+      } catch (error) {
+        console.error("Error in callback:", error);
+      } finally {
+        // Cerrar el controller si aún está activo
+        isClosed = true;
+        try {
+          if (controller.desiredSize !== null) {
+            controller.close();
+          }
+        } catch (error) {
+          console.warn("Error closing controller in finally:", error);
+        }
+      }
     },
   });
 
@@ -40,27 +70,10 @@ export const responseSSE = (
   });
 };
 
-// Subida de flujo a Cloudinary, convertir a binario y almacenarlo en un búfer.
-// export const uploadStream = async (buffer: Uint8Array): Promise<UploadApiResponse | any> => {
-//   return new Promise((resolve, reject) => {
-//     const options = {
-//       folder: "pdf",
-//       ocr: "adv_ocr",
-//     };
-//     // Subir el flujo a Cloudinary
-//     cloudinaryInstance.uploader
-//       .upload_stream(options, (error, result) => {
-//         if (result) return resolve(result);
-//         reject(error);
-//       })
-//       .end(buffer);
-//   });
-// };
-
 // Procesar un chunk, obtenido al procesar el texto repsuesta
 const processChunk = (chunk: string, newResponseAssistant: Message, sendEvent: (event: any) => void) => {
   try {
-    // Vamos almacenando el parse de los chunks como nuesva repuesta y lo enviamos al evento de su servicio
+    // Vamos almacenando el parse de los chunks como nueva respuesta y lo enviamos al evento de su servicio
     const data = JSON.parse(chunk);
     newResponseAssistant.content += data.message.content;
     sendEvent(data);
