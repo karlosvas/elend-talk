@@ -1,6 +1,5 @@
 import { setAppStatusError } from "@/utils/store";
 import { type SubmitOllamaParams } from "@/types/types";
-import mod from "astro/zod";
 
 /**
  * Envía datos a la API de Ollama y maneja la respuesta en streaming
@@ -9,20 +8,18 @@ import mod from "astro/zod";
  * @param answer - Un store writable para acumular la respuesta de la IA
  */
 export const submitOllama = async ({ event, loading, answer, model }: SubmitOllamaParams): Promise<void> => {
-  // Obtener la pregunta del input del formulario
+  // Obtener la pregunta del input del formulario y validar su existencia
   const question = event.target.question.value;
-  event.target.question.value = "";
-
   if (!question || !model) return setAppStatusError("The question or model is missing");
 
-  // Reiniciar el store de respuesta antes de obtener una nueva respuesta
-  answer.set({ value: "" });
+  event.target.question.value = ""; // Limpiamos el formulario
+  answer.set({ value: "" }); // Reiniciar el store de respuesta antes de obtener una nueva respuesta
+  loading.set({ value: true });
 
   // Crear parámetros de URL para la solicitud a la API
   const searchParams = new URLSearchParams();
   searchParams.append("question", question);
   searchParams.append("model", model);
-  // loading.set({ value: true });
 
   try {
     // Inicializar la conexión de Server-Sent Events
@@ -44,6 +41,11 @@ export const submitOllama = async ({ event, loading, answer, model }: SubmitOlla
       // Añadir nuevo contenido a la respuesta existente
       answer.update((current) => {
         return { value: current.value + data.message.content };
+      });
+      // Cambiamos el scroll a la parte inferior de la página para que se vea la respuesta
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: "smooth",
       });
     };
 

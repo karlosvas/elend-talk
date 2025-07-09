@@ -8,35 +8,36 @@
    import { getCookie } from '@/utils/cookies';
    import StepLoading from './StepLoading.svelte';
 
-   // Variables de estado, cargando y procesando respuesta respuesta
+   // Variables de estado, loading se utiliza para saber cuando se está procesando la respuesta
    export let loading:Writable<{ value: boolean }>  = writable({value: false});
    export let answer:Writable<{ value: string }> = writable({value: ""});
 
-   // Enviar respuesta a ollama
+   // Enviar pregunta a Ollama
    const handleSubmit =  async (event: any) => {
       event.preventDefault();
       try{
-         
-         // Obtenemos el modelo de la cookie "selectedModel", no del valor del select
+         // Obtenemos el modelo de las cookie "selectedModel" se es que existe
          const model = getCookie("selectedModel") as string || undefined;
          if(!model) {
             setAppStatusError("You must select a model before asking a question");
             return;
          }
          
+         // Convertimos el modelo a un tipo OllamaModel
          const ollamaModel = stringToOllamaModel(model) as OllamaModel || null;
          if(!ollamaModel) {
             setAppStatusError("Invalid model selected");
             return;
          }
          
-         loading.set({ value: true });
+         // Cambiamos el estado de la aplicación a loading ya que se esta procesando una respuesta, y enviamos la pregunta a Ollama
          await submitOllama({ event, loading, answer, model: ollamaModel });
       } catch (error) {
          setAppStatusError(error as string);
       }
   };
 
+  // Convertimos la respuesta de Ollama a HTML utilizando marked
   $: htmlContent = $answer?.value ? marked($answer.value) : '';
 </script>
 
@@ -59,10 +60,11 @@
     name="question"
     required
     placeholder="What is this document about?"
+    autoComplete="off"
   ></Input>
 </form>
 
-<!-- Mostramos la respuesta de ollama -->
+<!-- Mostramos la respuesta de Ollama si es que existe si no y esta cargando mostramos la carga -->
 {#if $answer.value.length > 0}
    <div class="mt-8 p-6 bg-gray-800 rounded-lg shadow-lg">
       <h2 class="text-xl font-bold mb-4 text-white">Response</h2>

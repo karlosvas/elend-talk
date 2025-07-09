@@ -38,7 +38,7 @@ Before running the application, you need to install Ollama 3.2:
 
 ### Windows
 
-Download and run the Windows installer from: https://ollama.ai/download/windows
+Download and run the Windows installer from: <https://ollama.ai/download/windows>
 
 ### Linux and macOS
 
@@ -48,24 +48,18 @@ curl https://ollama.ai/install.sh | sh
 
 ### Setup Ollama
 
-1. Obtain the Ollama model you want to use.
-
 ```bash
-sudo ollama serve
-ollama pull llama3.2:latest # for example
-## To use a different model, update the model name in `src/config/constants.ts`.
-export const MODEL_OLLAMA = "llama3.2";
-```
+## 1. Obtain the Ollama model you want to use.
+sudo ollama serve # to start the Ollama server
 
-2. Clone this repository:
+ollama pull llama3.2 # for example (medium)
+ollama pull llama3.1 # for example (small)
+ollama pull deepseek-r1 # for example (big)
 
-```bash
+## 2. Clone this repository:
 git clone https://github.com/your-username/pdf-to-talk.git
-```
 
-3. Install dependencies, compile project and start the application:
-
-```bash
+## 3. Install dependencies, compile project and start the application:
 pnpm install
 pnpm run build
 pnpm run dev
@@ -73,7 +67,7 @@ pnpm run dev
 
 ### Requirements
 
-Node.js, Compatible web browser ✅
+Node.js, Compatible web browser ✅, and Ollama installed.
 
 ## Contributions 🙌
 

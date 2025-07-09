@@ -4,11 +4,11 @@ import { OllamaModel } from "../types/types";
 ---
 
 <main
-  class="grid justify-items-center min-h-screen py-20 bg-[linear-gradient(to_right,rgba(100,145,230,1),rgba(135,120,300,1),rgba(135,120,300,1),rgba(100,145,230,1))]"
+  class="grid justify-items-center min-h-full py-20 mb-0 bg-[linear-gradient(to_right,rgba(100,145,230,1),rgba(135,120,300,1),rgba(135,120,300,1),rgba(100,145,230,1))]"
 >
-  <div class="mb-8 flex flex-col items-end pr-10 w-full mr-0 lg:mr-96 relative">
+  <div class="flex flex-col items-end w-fit mr-20 xl:mr-96 h-fit absolute right-0 md:top-56">
     <label for="model-select" class="mb-2 text-lg font-semibold text-white">Select your model</label>
-    <img src="" alt="" id="ia-icon" class="absolute top-8 right-64 w-auto h-10 hidden" />
+    <img src="" alt="" id="ia-icon" class="absolute top-8 right-52 w-auto h-10 hidden" />
     <select
       id="model-select"
       name="model"
@@ -20,7 +20,7 @@ import { OllamaModel } from "../types/types";
       <option value={OllamaModel.Llama3_2}>Llama 3.2</option>
     </select>
   </div>
-  <section class="container max-w-xl min-h-64">
+  <section class="container max-w-xl min-h-64 mt-52">
     <App client:idle />
   </section>
 </main>

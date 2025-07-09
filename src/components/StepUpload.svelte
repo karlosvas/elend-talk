@@ -11,9 +11,10 @@
       rejected: []
    };
 
-   // Manejador de archivos seleccionados
+   // Manejador de archivos seleccionados, al hacer drag n drop o hacer click en el dropzone 
    async function handleFilesSelect(e: CustomEvent) {
     try {
+      // Obtenemos el modelo seleccionado del select
       const modelSelect = document.getElementById("model-select") as HTMLSelectElement | null;
 
       if(modelSelect && modelSelect.value === "") 
@@ -32,14 +33,34 @@
          setAppStatusLoading();
 
          // Extreamos información del pfd, se lo damos al estado de la aplicacion y lo subimos al servidor
-         const newInfo: PDFInfo = await extractTextFromPDF(acceptedFiles[0]);
-         // Añadimos el contexto al historial de chat de ollama el contexto
+        let newInfo: PDFInfo = {
+         id: "",
+         url: "",
+         pages: 0,
+         text: '',
+         images: []
+      };
+         
+         for(const file of acceptedFiles) {
+            let info = await extractTextFromPDF(file);
+            newInfo = {
+               id: newInfo + "\n" + file.name,
+               url: newInfo.url +"\n" + URL.createObjectURL(file),
+               pages:  newInfo.pages + info.pages,
+               text: newInfo.text + "\n" + info.text,
+               images: [...newInfo.images, ...info.images]
+            };
+            // Solo continuamos cuando TODOS los archivos han sido procesados con éxito
+            if(!info.text) 
+               throw new Error("The text could not be extracted from the PDF");
+         }
+         
          appStatusInfo.set(newInfo);
 
-         // Subimos el contexto al chat de ollama
+        
+
+         // Subimos el contexto al chat de Ollama
          try {
-            if(!newInfo.text) 
-               throw new Error("The text could not be extracted from the PDF");
 
             const response = await fetch('/api/upload', {
                method: 'POST',
@@ -67,11 +88,11 @@
 }
 </script>
 
-<!-- Si aun no hay archivos subidos, mostramos el grag and drop -->
+<!-- Si aun no hay archivos subidos, mostramos el drag and drop -->
 {#if files.accepted.length === 0}
-   <Dropzone
+      <Dropzone
       accept='application/pdf'
-      multiple={false}
+      multiple={true}
       on:drop={handleFilesSelect}>
-   </Dropzone>
+      </Dropzone>
 {/if}
